@@ -1,0 +1,28 @@
+version: "3.7"
+services:
+  portainer-ce:
+    container_name: ${PROJECT_NAME}_PORTAINER
+
+    image: portainer/portainer-ce
+    restart: always
+    labels:
+      # permet de créer un routeur Traefik
+      - "traefik.enable=true"
+      - "traefik.http.routers.${PROJECT_NAME}_PORTAINER.rule=Host(`${DOMAIN}.traefik.me`)"
+      - "traefik.http.services.${PROJECT_NAME}_PORTAINER.loadbalancer.server.port=9000"
+      - "traefik.http.routers.${PROJECT_NAME}_PORTAINER.tls=true"
+      - "traefik.http.routers.${PROJECT_NAME}_PORTAINER.tls.domains[0].main=${DOMAIN}.traefik.me"
+      - "traefik.http.routers.${PROJECT_NAME}_PORTAINER.tls.domains[0].sans=*.${DOMAIN}.traefik.me"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - .env
+    networks:
+      default:
+      project-network:
+networks:
+  default:
+    name: ${NETWORK_NAME}
+  project-network:
+    name: ${PROJECT_NAME}-NETWORK
+    internal: true
